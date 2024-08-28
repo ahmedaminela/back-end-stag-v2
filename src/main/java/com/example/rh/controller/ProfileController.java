@@ -29,10 +29,9 @@ public class ProfileController {
         ProfileResponse response = ProfileMapper.toResponse(createdProfile);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
     @PutMapping("/update/{id}")
     public ResponseEntity<ProfileResponse> updateProfile(@PathVariable Long id, @RequestBody ProfileRequest request) {
-        Profile updatedProfile = profileService.updateProfile(id, request);
+        Profile updatedProfile = profileService.updateProfileById(id, request);
         ProfileResponse response = ProfileMapper.toResponse(updatedProfile);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -46,33 +45,61 @@ public class ProfileController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProfile(@PathVariable Long id) {
-        profileService.deleteProfile(id);
+        profileService.deleteProfileById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    @PostMapping("/{id}/education/add")
-    public ResponseEntity<ProfileResponse> addEducation(@PathVariable Long id, @RequestBody EducationRequest educationRequest) {
-        Profile updatedProfile = profileService.addEducation(id, educationRequest);
+
+    @PutMapping("/update")
+    public ResponseEntity<ProfileResponse> updateMyProfile(@RequestBody ProfileRequest request) {
+        String username = profileService.getCurrentUsername();
+        Profile updatedProfile = profileService.updateProfileByUsername(username, request);
         ProfileResponse response = ProfileMapper.toResponse(updatedProfile);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}/education/remove/{educationId}")
-    public ResponseEntity<ProfileResponse> removeEducation(@PathVariable Long id, @PathVariable Long educationId) {
-        Profile updatedProfile = profileService.removeEducation(id, educationId);
+    @GetMapping("/me")
+    public ResponseEntity<ProfileResponse> getMyProfile() {
+        String username = profileService.getCurrentUsername();
+        Profile profile = profileService.getProfileByUsername(username);
+        ProfileResponse response = ProfileMapper.toResponse(profile);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteMyProfile() {
+        String username = profileService.getCurrentUsername();
+        profileService.deleteProfileByUsername(username);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/education/add")
+    public ResponseEntity<ProfileResponse> addEducation(@RequestBody EducationRequest educationRequest) {
+        String username = profileService.getCurrentUsername();
+        Profile updatedProfile = profileService.addEducation(username, educationRequest);
         ProfileResponse response = ProfileMapper.toResponse(updatedProfile);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/{id}/experience/add")
-    public ResponseEntity<ProfileResponse> addExperience(@PathVariable Long id, @RequestBody ExperienceRequest experienceRequest) {
-        Profile updatedProfile = profileService.addExperience(id, experienceRequest);
+    @DeleteMapping("/education/remove/{educationId}")
+    public ResponseEntity<ProfileResponse> removeEducation(@PathVariable Long educationId) {
+        String username = profileService.getCurrentUsername();
+        Profile updatedProfile = profileService.removeEducation(username, educationId);
         ProfileResponse response = ProfileMapper.toResponse(updatedProfile);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}/experience/remove/{experienceId}")
-    public ResponseEntity<ProfileResponse> removeExperience(@PathVariable Long id, @PathVariable Long experienceId) {
-        Profile updatedProfile = profileService.removeExperience(id, experienceId);
+    @PostMapping("/experience/add")
+    public ResponseEntity<ProfileResponse> addExperience(@RequestBody ExperienceRequest experienceRequest) {
+        String username = profileService.getCurrentUsername();
+        Profile updatedProfile = profileService.addExperience(username, experienceRequest);
+        ProfileResponse response = ProfileMapper.toResponse(updatedProfile);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/experience/remove/{experienceId}")
+    public ResponseEntity<ProfileResponse> removeExperience(@PathVariable Long experienceId) {
+        String username = profileService.getCurrentUsername();
+        Profile updatedProfile = profileService.removeExperience(username, experienceId);
         ProfileResponse response = ProfileMapper.toResponse(updatedProfile);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

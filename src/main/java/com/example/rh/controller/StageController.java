@@ -48,9 +48,9 @@ public class StageController {
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('CREATE_STAGE')")
     public ResponseEntity<StageResponse> createStage(
-            @RequestBody StageCreateRequest request,
-            @Parameter(description = "ID of the RH creating the stage") @RequestParam Long rhId) {
-        Stage createdStage = stageService.createStage(request, rhId);
+            @RequestBody StageCreateRequest request) {
+        String currentUsername = stageService.getCurrentUsername(); // Get the current user's username
+        Stage createdStage = stageService.createStage(request, currentUsername);
         StageResponse response = StageMapper.toStageResponse(createdStage);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -65,7 +65,8 @@ public class StageController {
     public ResponseEntity<StageResponse> updateStage(
             @Parameter(description = "ID of the stage to update") @PathVariable Long id,
             @RequestBody Stage updatedStageData) {
-        Stage updatedStage = stageService.updateStage(id, updatedStageData);
+        String currentUsername = stageService.getCurrentUsername();
+        Stage updatedStage = stageService.updateStage(id, updatedStageData, currentUsername);
         StageResponse response = StageMapper.toStageResponse(updatedStage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -79,10 +80,10 @@ public class StageController {
     @PreAuthorize("hasAuthority('DELETE_STAGE')")
     public ResponseEntity<Void> deleteStage(
             @Parameter(description = "ID of the stage to delete") @PathVariable Long id) {
-        stageService.deleteStage(id);
+        String currentUsername = stageService.getCurrentUsername();
+        stageService.deleteStage(id, currentUsername);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
     @Operation(summary = "Get details of a stage", description = "Retrieve the details of a specific stage by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Stage retrieved successfully", content = @Content(schema = @Schema(implementation = StageResponse.class))),
@@ -165,7 +166,8 @@ public class StageController {
     @PreAuthorize("hasAuthority('ACCEPT_APPLICATION')")
     public ResponseEntity<StageResponse> acceptApplication(
             @Parameter(description = "ID of the application to accept") @PathVariable Long applicationId) {
-        Stage updatedStage = stageService.acceptApplication(applicationId);
+        String currentUsername = stageService.getCurrentUsername();
+        Stage updatedStage = stageService.acceptApplication(applicationId, currentUsername);
         StageResponse response = StageMapper.toStageResponse(updatedStage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -179,7 +181,8 @@ public class StageController {
     @PreAuthorize("hasAuthority('REJECT_APPLICATION')")
     public ResponseEntity<StageResponse> rejectApplication(
             @Parameter(description = "ID of the application to reject") @PathVariable Long applicationId) {
-        Stage updatedStage = stageService.rejectApplication(applicationId);
+        String currentUsername = stageService.getCurrentUsername();
+        Stage updatedStage = stageService.rejectApplication(applicationId, currentUsername);
         StageResponse response = StageMapper.toStageResponse(updatedStage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -192,7 +195,8 @@ public class StageController {
     @PreAuthorize("hasAuthority('CANCEL_APPLICATION')")
     public ResponseEntity<StageResponse> cancelApplication(
             @Parameter(description = "ID of the application to cancel") @PathVariable Long applicationId) {
-        Stage updatedStage = stageService.cancelApplication(applicationId);
+        String currentUsername = stageService.getCurrentUsername();
+        Stage updatedStage = stageService.cancelApplication(applicationId, currentUsername);
         StageResponse response = StageMapper.toStageResponse(updatedStage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -326,6 +330,30 @@ public class StageController {
             @Parameter(description = "ID of the user to retrieve applications for") @PathVariable Long userId,
             Pageable pageable) {
         Page<Application> applications = stageService.getUserApplicationsPaginated(userId, pageable);
+        Page<ApplicationResponse> responses = applications.map(ApplicationMapper::toApplicationResponse);
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+    @Operation(summary = "Get my applications", description = "Retrieve a list of applications submitted by the connected user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Applications retrieved successfully", content = @Content(schema = @Schema(implementation = ApplicationResponse.class)))
+    })
+    @GetMapping("/my/applications")
+    @PreAuthorize("hasAuthority('GET_MY_APPLICATIONS')")
+    public ResponseEntity<List<ApplicationResponse>> getMyApplications() {
+        List<ApplicationResponse> responses = stageService.getMyApplications().stream()
+                .map(ApplicationMapper::toApplicationResponse)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get my applications (paginated)", description = "Retrieve a paginated list of applications submitted by the connected user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Applications retrieved successfully", content = @Content(schema = @Schema(implementation = ApplicationResponse.class)))
+    })
+    @GetMapping("/my/applications/paginated")
+    @PreAuthorize("hasAuthority('GET_MY_APPLICATIONS')")
+    public ResponseEntity<Page<ApplicationResponse>> getMyApplicationsPaginated(Pageable pageable) {
+        Page<Application> applications = stageService.getMyApplicationsPaginated(pageable);
         Page<ApplicationResponse> responses = applications.map(ApplicationMapper::toApplicationResponse);
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }

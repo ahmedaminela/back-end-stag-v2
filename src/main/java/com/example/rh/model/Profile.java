@@ -19,11 +19,6 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
-    private String email;
-
     @OneToOne
     @JoinColumn(name = "profile_picture_id")
     private File profilePicture;

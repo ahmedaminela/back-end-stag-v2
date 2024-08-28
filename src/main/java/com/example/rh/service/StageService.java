@@ -5,6 +5,9 @@ import com.example.rh.dto.StageCreateRequest;
 import com.example.rh.enums.ApplicationStatus;
 import com.example.rh.enums.NotificationType;
 import com.example.rh.enums.StageState;
+import com.example.rh.exception.InvalidOperationException;
+import com.example.rh.exception.ResourceNotFoundException;
+import com.example.rh.exception.UnauthorizedActionException;
 import com.example.rh.model.Application;
 import com.example.rh.model.Stage;
 import com.example.rh.model.User;
@@ -14,6 +17,8 @@ import com.example.rh.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -36,9 +41,11 @@ public class StageService {
         this.notificationService = notificationService;
     }
 
-    public Stage createStage(StageCreateRequest request, Long rhId) {
-        User rh = userRepository.findById(rhId).orElseThrow(() -> new RuntimeException("RH not found"));
-        User encadrant = userRepository.findById(request.getEncadrantId()).orElseThrow(() -> new RuntimeException("Encadrant not found"));
+    public Stage createStage(StageCreateRequest request, String username) {
+        User rh = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("RH not found"));
+        User encadrant = userRepository.findById(request.getEncadrantId())
+                .orElseThrow(() -> new ResourceNotFoundException("Encadrant not found"));
 
         Stage stage = new Stage();
         stage.setTitle(request.getTitle());
@@ -51,18 +58,19 @@ public class StageService {
 
         stage = stageRepository.save(stage);
 
-        rh.getStages().add(stage);
-        encadrant.setStageEncadrant(stage);
-        userRepository.save(rh);
-        userRepository.save(encadrant);
         notificationService.createNotification(stage.getEncadrant().getId(),
                 "You have been assigned to a new stage with id = " + stage.getId() + ", title = " + stage.getTitle(),
                 NotificationType.STAGE_ASSIGNED);
         return stage;
     }
 
-    public Stage updateStage(Long stageId, Stage updatedStageData) {
-        Stage stage = stageRepository.findById(stageId).orElseThrow(() -> new RuntimeException("Stage not found"));
+    public Stage updateStage(Long stageId, Stage updatedStageData, String username) {
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
+
+        if (!stage.getRh().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("Unauthorized: Only the RH who created the stage can update it");
+        }
 
         stage.setTitle(updatedStageData.getTitle());
         stage.setDescription(updatedStageData.getDescription());
@@ -73,13 +81,19 @@ public class StageService {
         return stageRepository.save(stage);
     }
 
-    public void deleteStage(Long stageId) {
-        Stage stage = stageRepository.findById(stageId).orElseThrow(() -> new RuntimeException("Stage not found"));
+    public void deleteStage(Long stageId, String username) {
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
+
+        if (!stage.getRh().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("Unauthorized: Only the RH who created the stage can delete it");
+        }
         stageRepository.delete(stage);
     }
 
     public Stage getStage(Long stageId) {
-        return stageRepository.findById(stageId).orElseThrow(() -> new RuntimeException("Stage not found"));
+        return stageRepository.findById(stageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
     }
 
     public List<Stage> getAllStages() {
@@ -91,8 +105,10 @@ public class StageService {
     }
 
     public Stage applyForStage(ApplicationRequest request) {
-        Stage stage = stageRepository.findById(request.getStageId()).orElseThrow(() -> new RuntimeException("Stage not found"));
-        User stagiaire = userRepository.findById(request.getStagiaireId()).orElseThrow(() -> new RuntimeException("Stagiaire not found"));
+        Stage stage = stageRepository.findById(request.getStageId())
+                .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
+        User stagiaire = userRepository.findById(request.getStagiaireId())
+                .orElseThrow(() -> new ResourceNotFoundException("Stagiaire not found"));
 
         Application application = new Application();
         application.setStage(stage);
@@ -111,17 +127,23 @@ public class StageService {
     }
 
     public List<Application> getApplicationsForStage(Long stageId) {
-        Stage stage = stageRepository.findById(stageId).orElseThrow(() -> new RuntimeException("Stage not found"));
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
         return applicationRepository.findByStage(stage);
     }
 
-    public Stage acceptApplication(Long applicationId) {
-        Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new RuntimeException("Application not found"));
+    public Stage acceptApplication(Long applicationId, String username) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         Stage stage = application.getStage();
+
+        if (!stage.getRh().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("Unauthorized: Only the RH who created the stage can accept applications");
+        }
         User stagiaire = application.getStagiaire();
 
         if (!application.getStatus().equals(ApplicationStatus.PENDING)) {
-            throw new RuntimeException("Application is not in a pending state");
+            throw new InvalidOperationException("Application is not in a pending state");
         }
 
         application.setStatus(ApplicationStatus.ACCEPTED);
@@ -132,71 +154,67 @@ public class StageService {
                 "Congratulations! You have been accepted for the stage " + stage.getTitle(),
                 NotificationType.APPLICATION_ACCEPTED);
 
-        User encadrant = stage.getEncadrant();
-        if (encadrant != null) {
-            stagiaire.setEncadrant(encadrant);
-            encadrant.getStagiairesEncadrant().add(stagiaire);
-            userRepository.save(encadrant);
-            notificationService.createNotification(stage.getEncadrant().getId(),
-                    stagiaire.getFirstname() + " " + stagiaire.getLastname() + " has been accepted for your stage " + stage.getTitle(),
-                    NotificationType.APPLICATION_ACCEPTED);
-        }
-
         applicationRepository.save(application);
         return stageRepository.save(stage);
     }
 
-    public Stage rejectApplication(Long applicationId) {
-        Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new RuntimeException("Application not found"));
+    public Stage rejectApplication(Long applicationId, String username) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         Stage stage = application.getStage();
-        User stagiaire = application.getStagiaire();
+
+        if (!stage.getRh().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("Unauthorized: Only the RH who created the stage can reject applications");
+        }
 
         if (!application.getStatus().equals(ApplicationStatus.PENDING)) {
-            throw new RuntimeException("Application is not in a pending state");
+            throw new InvalidOperationException("Application is not in a pending state");
         }
 
         application.setStatus(ApplicationStatus.REJECTED);
 
-        notificationService.createNotification(stagiaire.getId(),
+        notificationService.createNotification(application.getStagiaire().getId(),
                 "We regret to inform you that your application for the stage " + stage.getTitle() + " has been rejected.",
                 NotificationType.APPLICATION_REJECTED);
 
         applicationRepository.save(application);
         return stageRepository.save(stage);
     }
-    public Stage cancelApplication(Long applicationId) {
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        // Ensure that the application is in a cancellable state (e.g., it has not been accepted or rejected)
+    public Stage cancelApplication(Long applicationId, String username) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        if (!application.getStagiaire().getUsername().equals(username)) {
+            throw new UnauthorizedActionException("Unauthorized: Only the stagiaire who created the application can cancel it");
+        }
         if (!application.getStatus().equals(ApplicationStatus.PENDING)) {
-            throw new RuntimeException("Only pending applications can be canceled");
+            throw new InvalidOperationException("Only pending applications can be canceled");
         }
 
-        Stage stage = application.getStage();
-        User stagiaire = application.getStagiaire();
+        application.setStatus(ApplicationStatus.CANCELED);
 
-        // Remove the application
-        applicationRepository.delete(application);
-
-        // Optionally, you might want to notify the RH that the application has been canceled
-        notificationService.createNotification(stage.getRh().getId(),
-                stagiaire.getFirstname() + " " + stagiaire.getLastname() + " has canceled their application for the stage " + stage.getTitle(),
+        notificationService.createNotification(application.getStage().getRh().getId(),
+                application.getStagiaire().getFirstname() + " " + application.getStagiaire().getLastname() + " has canceled their application for the stage " + application.getStage().getTitle(),
                 NotificationType.APPLICATION_CANCELED);
 
-        return stage;
+        return application.getStage();
     }
+
     public List<Application> getUserApplications(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return applicationRepository.findByStagiaire(user);
     }
+
     public Page<Stage> getAllStagesPaginated(Pageable pageable) {
         return stageRepository.findAll(pageable);
     }
+
     public Page<Stage> getStagesByStatePaginated(StageState state, Pageable pageable) {
-        return stageRepository.findByState(state,pageable);
+        return stageRepository.findByState(state, pageable);
     }
+
     public List<Stage> searchStages(String keyword) {
         return stageRepository.findByTitleContainingOrDescriptionContaining(keyword, keyword);
     }
@@ -204,10 +222,13 @@ public class StageService {
     public Page<Stage> searchStagesPaginated(String keyword, Pageable pageable) {
         return stageRepository.findByTitleContainingOrDescriptionContaining(keyword, keyword, pageable);
     }
+
     public Page<Application> getApplicationsForStagePaginated(Long stageId, Pageable pageable) {
-        Stage stage = stageRepository.findById(stageId).orElseThrow(() -> new RuntimeException("Stage not found"));
+        Stage stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
         return applicationRepository.findByStage(stage, pageable);
     }
+
     public List<Application> searchApplicationsByStagiaireName(String keyword) {
         return applicationRepository.findByStagiaire_FirstnameContainingOrStagiaire_LastnameContaining(keyword, keyword);
     }
@@ -215,9 +236,30 @@ public class StageService {
     public Page<Application> searchApplicationsByStagiaireNamePaginated(String keyword, Pageable pageable) {
         return applicationRepository.findByStagiaire_FirstnameContainingOrStagiaire_LastnameContaining(keyword, keyword, pageable);
     }
+
     public Page<Application> getUserApplicationsPaginated(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return applicationRepository.findByStagiaire(user, pageable);
+    }
+
+    public List<Application> getMyApplications() {
+        String username = getCurrentUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return applicationRepository.findByStagiaire(user);
+    }
+
+    public Page<Application> getMyApplicationsPaginated(Pageable pageable) {
+        String username = getCurrentUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return applicationRepository.findByStagiaire(user, pageable);
+    }
+
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
 }
