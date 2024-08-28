@@ -1,8 +1,8 @@
 package com.example.rh.enums;
 
 public enum Roles {
-    Role_stagiare,
-    Role_RH,
-    Role_encadrant;
+    ROLE_STAGIAIRE,
+    ROLE_RH,
+    ROLE_ENCADRANT;
 
 }

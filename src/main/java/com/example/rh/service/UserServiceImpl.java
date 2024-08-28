@@ -5,17 +5,16 @@ import com.example.rh.repository.RoleRepository;
 import com.example.rh.repository.UserRepository;
 import com.example.rh.service.Exception.BusinessException;
 import lombok.AllArgsConstructor;
-import com.example.rh.repository.PermissionRepository;
-import com.example.rh.repository.RoleRepository;
-import com.example.rh.repository.UserRepository;
-import com.example.rh.Dto.PermissionVo;
-import com.example.rh.Dto.RoleVo;
-import com.example.rh.Dto.UserVo;
+import com.example.rh.dto.PermissionVo;
+import com.example.rh.dto.RoleVo;
+import com.example.rh.dto.UserVo;
 import com.example.rh.model.Permission;
 import com.example.rh.model.Role;
 import com.example.rh.model.User;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,23 +29,34 @@ import java.util.stream.Collectors;
 @Transactional
 @AllArgsConstructor
 public class UserServiceImpl implements IUserService, UserDetailsService {
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
-    private ModelMapper modelMapper;
-    private PermissionRepository permissionRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+    private final PermissionRepository permissionRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserVo userVo = modelMapper.map(userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec le nom d'utilisateur: " + username)), UserVo.class);
+        // Load the user entity and map it to UserVo
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        List<RoleVo> permissions = new ArrayList<>();
-        userVo.getAuthorities().forEach(
-                roleVo -> roleVo.getAuthorities().forEach(
-                        permission -> permissions.add(
-                                RoleVo.builder().authority(permission.getAuthority()).build())));
-        userVo.getAuthorities().addAll(permissions);
-        return userVo;
+        // Flatten the authorities (roles and permissions) into GrantedAuthority
+        List<GrantedAuthority> authorities = user.getAuthorities().stream()
+                .flatMap(role -> role.getAuthorities().stream()
+                        .map(permission -> new SimpleGrantedAuthority(permission.getAuthority())))
+                .collect(Collectors.toList());
+
+        // Add roles as authorities
+        authorities.addAll(user.getAuthorities().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
+                .collect(Collectors.toList()));
+
+        // Return a Spring Security User object with authorities
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                authorities);
     }
 
     @Override
@@ -55,21 +64,23 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
         User user = modelMapper.map(userVo, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        List<Role> authorities = user.getAuthorities().stream()
-                .map(bo -> roleRepository.findByAuthority(bo.getAuthority())
-                        .orElseThrow(() -> new BusinessException("Role not found: " + bo.getAuthority())))
+        // Map roles and their permissions
+        List<Role> roles = user.getAuthorities().stream()
+                .map(roleVo -> roleRepository.findByAuthority(roleVo.getAuthority())
+                        .orElseThrow(() -> new BusinessException("Role not found: " + roleVo.getAuthority())))
                 .collect(Collectors.toList());
 
-        user.setAuthorities(authorities);
+        user.setAuthorities(roles);
         userRepository.save(user);
     }
 
     @Override
     public void save(RoleVo roleVo) {
         Role role = modelMapper.map(roleVo, Role.class);
-        role.setAuthorities(role.getAuthorities().stream().map(bo ->
-                        permissionRepository.findByAuthority(bo.getAuthority()).get()).
-                collect(Collectors.toList()));
+        role.setAuthorities(role.getAuthorities().stream()
+                .map(permissionVo -> permissionRepository.findByAuthority(permissionVo.getAuthority())
+                        .orElseThrow(() -> new BusinessException("Permission not found: " + permissionVo.getAuthority())))
+                .collect(Collectors.toList()));
         roleRepository.save(role);
     }
 
@@ -80,17 +91,21 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
     @Override
     public RoleVo getRoleByName(String authority) {
-        return modelMapper.map(roleRepository.findByAuthority(authority).get(), RoleVo.class);
+        return modelMapper.map(roleRepository.findByAuthority(authority)
+                .orElseThrow(() -> new BusinessException("Role not found: " + authority)), RoleVo.class);
     }
 
     @Override
     public PermissionVo getPermissionByName(String authority) {
-        return modelMapper.map(permissionRepository.findByAuthority(authority), PermissionVo.class);
+        return modelMapper.map(permissionRepository.findByAuthority(authority)
+                .orElseThrow(() -> new BusinessException("Permission not found: " + authority)), PermissionVo.class);
     }
 
     @Override
     public List<PermissionVo> getAllPermissions() {
-        return permissionRepository.findAll().stream().map(PermissionVo::fromEntity).collect(Collectors.toList());
+        return permissionRepository.findAll().stream()
+                .map(permission -> modelMapper.map(permission, PermissionVo.class))
+                .collect(Collectors.toList());
     }
 
     public boolean roleExists(String roleName) {
@@ -105,5 +120,4 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     public boolean userExistsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
-
 }

@@ -69,6 +69,7 @@ public class SecurityConfiguration {
                 .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers(

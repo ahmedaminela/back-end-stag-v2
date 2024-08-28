@@ -1,6 +1,6 @@
 package com.example.rh;
 
-import com.example.rh.Dto.*;
+import com.example.rh.dto.*;
 import com.example.rh.enums.Permissions;
 import com.example.rh.enums.Roles;
 import com.example.rh.service.IUserService;
@@ -42,64 +42,51 @@ public class RhApplication {
             }
 
             // Check if the roles already exist before creating them
-            if (!userService.roleExists(Roles.Role_RH.name())) {
+            if (!userService.roleExists(Roles.ROLE_RH.name())) {
                 RoleVo roleRH = RoleVo.builder()
-                        .authority(Roles.Role_RH.name())
+                        .authority(Roles.ROLE_RH.name())
                         .authorities(List.of(
-                                userService.getPermissionByName(Permissions.GERER_LES_DECISIONS_STAGES.name()),
-                                userService.getPermissionByName(Permissions.AFFILIER_STAGE.name())
+                                userService.getPermissionByName(Permissions.CREATE_STAGE.name()),
+                                userService.getPermissionByName(Permissions.VIEW_CANDIDATES.name()),
+                                userService.getPermissionByName(Permissions.ACCEPT_APPLICATION.name()),
+                                userService.getPermissionByName(Permissions.REJECT_APPLICATION.name()),
+                                userService.getPermissionByName(Permissions.ASSIGN_ENCADRANT.name()),
+                                userService.getPermissionByName(Permissions.UPDATE_STAGE.name()),
+                                userService.getPermissionByName(Permissions.DELETE_STAGE.name()),
+                                userService.getPermissionByName(Permissions.GET_STAGE.name()),
+                                userService.getPermissionByName(Permissions.GET_ALL_STAGES.name()),
+                                userService.getPermissionByName(Permissions.GET_STAGES_BY_STATE.name())
                         ))
                         .build();
                 userService.save(roleRH);
             }
 
-            if (!userService.roleExists(Roles.Role_encadrant.name())) {
+            if (!userService.roleExists(Roles.ROLE_ENCADRANT.name())) {
                 RoleVo roleEncadrant = RoleVo.builder()
-                        .authority(Roles.Role_encadrant.name())
+                        .authority(Roles.ROLE_ENCADRANT.name())
                         .authorities(List.of(
-                                userService.getPermissionByName(Permissions.EVALUER_STAGIARE.name()),
-                                userService.getPermissionByName(Permissions.ATTRIBUER_SUJET_STAGIARE.name())
+                                userService.getPermissionByName(Permissions.UPDATE_STAGE_STATE.name()),
+                                userService.getPermissionByName(Permissions.UPDATE_STAGE.name()),
+                                userService.getPermissionByName(Permissions.GET_STAGE.name()),
+                                userService.getPermissionByName(Permissions.GET_ALL_STAGES.name())
                         ))
                         .build();
                 userService.save(roleEncadrant);
             }
 
-            if (!userService.roleExists(Roles.Role_stagiare.name())) {
-                RoleVo roleStagiare = RoleVo.builder()
-                        .authority(Roles.Role_stagiare.name())
+            if (!userService.roleExists(Roles.ROLE_STAGIAIRE.name())) {
+                RoleVo roleStagiaire = RoleVo.builder()
+                        .authority(Roles.ROLE_STAGIAIRE.name())
                         .authorities(List.of(
-                                userService.getPermissionByName(Permissions.CONSULTER_SJT_STAGE.name()),
-                                userService.getPermissionByName(Permissions.POSTULER.name())
+                                userService.getPermissionByName(Permissions.APPLY_FOR_STAGE.name()),
+                                userService.getPermissionByName(Permissions.GET_STAGE.name()),
+                                userService.getPermissionByName(Permissions.GET_ALL_STAGES.name()),
+                                userService.getPermissionByName(Permissions.GET_STAGES_BY_STATE.name())
                         ))
                         .build();
-                userService.save(roleStagiare);
+                userService.save(roleStagiaire);
             }
 
-            // Check if the RH user already exists before creating it
-            if (!userService.userExists("rhuser")) {
-                UserVo rhUser = UserVo.builder()
-                        .username("rhuser")
-                        .password("rhpassword")
-                        .email("rh@example.com")
-                        .firstname("RH")
-                        .lastname("User")
-                        .authorities(List.of(userService.getRoleByName(Roles.Role_RH.name())))
-                        .build();
-                userService.save(rhUser);
-            }
-
-            // Check if the Encadrant user already exists before creating it
-            if (!userService.userExists("encadrantuser")) {
-                UserVo encadrantUser = UserVo.builder()
-                        .username("encadrantuser")
-                        .password("encadrantpassword")
-                        .email("encadrant@example.com")
-                        .firstname("Encadrant")
-                        .lastname("User")
-                        .authorities(List.of(userService.getRoleByName(Roles.Role_encadrant.name())))
-                        .build();
-                userService.save(encadrantUser);
-            }
         };
     }
 }

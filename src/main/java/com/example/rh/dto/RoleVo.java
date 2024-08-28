@@ -1,4 +1,4 @@
-package com.example.rh.Dto;
+package com.example.rh.dto;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 public class RoleVo implements GrantedAuthority {
     private int id;
-    //this field contains the role user, for example : ROLE_ADMIN
     private String authority;
     private List<PermissionVo> authorities = new ArrayList<>();
 }

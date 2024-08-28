@@ -1,16 +1,13 @@
-package com.example.rh.Dto;
+package com.example.rh.dto;
 
-import com.example.rh.model.Role;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Data
@@ -23,8 +20,9 @@ public class UserVo implements UserDetails {
     private String username;
     @NotEmpty
     private String password;
-    protected String firstname;
-    protected String lastname;
+    protected String firstName;
+    protected String lastName;
+    private String phoneNumber;
     private List<RoleVo> authorities = new ArrayList<RoleVo>();
     private String email;
 

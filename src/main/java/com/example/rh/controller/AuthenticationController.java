@@ -1,12 +1,10 @@
-package com.example.rh.RestController;
+package com.example.rh.controller;
 
 import com.example.rh.repository.RoleRepository;
 import com.example.rh.repository.UserRepository;
-import com.example.rh.Dto.*;
+import com.example.rh.dto.*;
 import com.example.rh.jwt.JwtUtils;
 import com.example.rh.service.IUserService;
-import com.example.rh.service.Exception.BusinessException;
-import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +45,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<TokenVo> authenticateUser(@RequestBody Userrequest userRequest) {
+    public ResponseEntity<TokenVo> authenticateUser(@RequestBody UserRequest userRequest) {
         try {
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(userRequest.username(), userRequest.password()));
@@ -74,20 +72,26 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public ResponseEntity<String> createUser(@RequestBody CreateUserRequest createUserRequest) {
 
-        if(userService.userExists(createUserRequest.username()))
-        {
+        if (userService.userExists(createUserRequest.username())) {
             return new ResponseEntity<>(String.format("User with username [%s] already exists", createUserRequest.username()), HttpStatus.BAD_REQUEST);
         }
-        if(userService.userExistsByEmail(createUserRequest.email()))
-        {
+        if (userService.userExistsByEmail(createUserRequest.email())) {
             return new ResponseEntity<>(String.format("User with email [%s] already exists", createUserRequest.email()), HttpStatus.BAD_REQUEST);
+        }
+        if(!userService.roleExists(createUserRequest.role()))
+        {
+            return new ResponseEntity<>(String.format("Role [%s] does not exist", createUserRequest.role()), HttpStatus.BAD_REQUEST);
         }
         userService.save(UserVo.builder()
                 .username(createUserRequest.username())
                 .password(createUserRequest.password())
+                .firstName(createUserRequest.firstName())
+                .lastName(createUserRequest.lastName())
+                .phoneNumber(createUserRequest.phoneNumber())
                 .email(createUserRequest.email())
-                .authorities(List.of(RoleVo.builder().authority("Role_stagiare").build()))
+                .authorities(List.of(RoleVo.builder().authority(createUserRequest.role()).build()))
                 .build());
+
         return new ResponseEntity<>(String.format("User [%s] created with success", createUserRequest.username()), HttpStatus.CREATED);
     }
 }
