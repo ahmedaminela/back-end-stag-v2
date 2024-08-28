@@ -49,7 +49,7 @@ public class StageController {
     @PreAuthorize("hasAuthority('CREATE_STAGE')")
     public ResponseEntity<StageResponse> createStage(
             @RequestBody StageCreateRequest request) {
-        String currentUsername = stageService.getCurrentUsername(); // Get the current user's username
+        String currentUsername = stageService.getCurrentUsername();
         Stage createdStage = stageService.createStage(request, currentUsername);
         StageResponse response = StageMapper.toStageResponse(createdStage);
         return new ResponseEntity<>(response, HttpStatus.CREATED);

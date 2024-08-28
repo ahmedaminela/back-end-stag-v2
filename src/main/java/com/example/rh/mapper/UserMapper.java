@@ -35,7 +35,7 @@ public class UserMapper {
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
                 .email(user.getEmail())
-                .stageId(user.getStageEncadrant() != null ? user.getStageEncadrant().getId() : null) // Include stageId
+                .stageId(user.getStageEncadrant() != null ? user.getStageEncadrant().getId() : null)
                 .phoneNumber(user.getPhoneNumber())
                 .build();
 }}

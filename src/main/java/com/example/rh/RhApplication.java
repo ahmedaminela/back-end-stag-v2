@@ -35,13 +35,13 @@ public class RhApplication {
     @Bean
     CommandLineRunner initDataBase(IUserService userService) {
         return args -> {
-            // Check if any permissions already exist to avoid duplication
+
             if (userService.getAllPermissions().isEmpty()) {
                 Arrays.stream(Permissions.values()).toList().forEach(permission ->
                         userService.save(PermissionVo.builder().authority(permission.name()).build()));
             }
 
-            // Check if the roles already exist before creating them
+
             if (!userService.roleExists(Roles.ROLE_RH.name())) {
                 RoleVo roleRH = RoleVo.builder()
                         .authority(Roles.ROLE_RH.name())

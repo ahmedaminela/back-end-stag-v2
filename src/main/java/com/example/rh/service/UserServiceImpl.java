@@ -37,22 +37,22 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Load the user entity and map it to UserVo
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        // Flatten the authorities (roles and permissions) into GrantedAuthority
+
         List<GrantedAuthority> authorities = user.getAuthorities().stream()
                 .flatMap(role -> role.getAuthorities().stream()
                         .map(permission -> new SimpleGrantedAuthority(permission.getAuthority())))
                 .collect(Collectors.toList());
 
-        // Add roles as authorities
+
         authorities.addAll(user.getAuthorities().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
                 .collect(Collectors.toList()));
 
-        // Return a Spring Security User object with authorities
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -64,7 +64,7 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
         User user = modelMapper.map(userVo, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Map roles and their permissions
+
         List<Role> roles = user.getAuthorities().stream()
                 .map(roleVo -> roleRepository.findByAuthority(roleVo.getAuthority())
                         .orElseThrow(() -> new BusinessException("Role not found: " + roleVo.getAuthority())))

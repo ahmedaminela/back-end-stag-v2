@@ -26,7 +26,7 @@ public class Notification {
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
-    // Enum to categorize notifications (e.g., STAGE_CREATED, APPLICATION_RECEIVED)
+
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 }
