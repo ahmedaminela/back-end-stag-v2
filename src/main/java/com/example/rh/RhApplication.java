@@ -1,6 +1,7 @@
 package com.example.rh;
 
-import com.example.rh.dto.*;
+import com.example.rh.dto.PermissionVo;
+import com.example.rh.dto.RoleVo;
 import com.example.rh.enums.Permissions;
 import com.example.rh.enums.Roles;
 import com.example.rh.service.IUserService;

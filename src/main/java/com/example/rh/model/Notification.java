@@ -2,7 +2,9 @@ package com.example.rh.model;
 
 import com.example.rh.enums.NotificationType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 

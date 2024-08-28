@@ -1,10 +1,10 @@
 package com.example.rh.controller;
 
 import com.example.rh.dto.NotificationResponse;
+import com.example.rh.enums.NotificationType;
 import com.example.rh.mapper.NotificationMapper;
 import com.example.rh.model.Notification;
 import com.example.rh.service.NotificationService;
-import com.example.rh.enums.NotificationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

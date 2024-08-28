@@ -1,10 +1,6 @@
 package com.example.rh.controller;
 
-import com.example.rh.dto.ApplicationRequest;
-import com.example.rh.dto.ApplicationResponse;
-import com.example.rh.dto.StageCreateRequest;
-import com.example.rh.dto.StageResponse;
-import com.example.rh.dto.StagiaireResponse;
+import com.example.rh.dto.*;
 import com.example.rh.enums.StageState;
 import com.example.rh.mapper.ApplicationMapper;
 import com.example.rh.mapper.StageMapper;

@@ -1,7 +1,10 @@
 package com.example.rh.dto;
 
 import com.example.rh.model.Permission;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
