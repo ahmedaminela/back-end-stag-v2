@@ -81,10 +81,6 @@ public class AuthenticationController {
         if (userService.userExistsByEmail(createUserRequest.email())) {
             return new ResponseEntity<>(String.format("User with email [%s] already exists", createUserRequest.email()), HttpStatus.BAD_REQUEST);
         }
-        if(!userService.roleExists(createUserRequest.role()))
-        {
-            return new ResponseEntity<>(String.format("Role [%s] does not exist", createUserRequest.role()), HttpStatus.BAD_REQUEST);
-        }
         userService.save(UserVo.builder()
                 .username(createUserRequest.username())
                 .password(createUserRequest.password())
@@ -92,9 +88,10 @@ public class AuthenticationController {
                 .lastName(createUserRequest.lastName())
                 .phoneNumber(createUserRequest.phoneNumber())
                 .email(createUserRequest.email())
-                .authorities(List.of(RoleVo.builder().authority(createUserRequest.role()).build()))
+                .authorities(List.of(RoleVo.builder().authority("ROLE_STAGIAIRE").build()))
                 .build());
 
         return new ResponseEntity<>(String.format("User [%s] created with success", createUserRequest.username()), HttpStatus.CREATED);
     }
+
 }

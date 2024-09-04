@@ -2,6 +2,7 @@ package com.example.rh;
 
 import com.example.rh.dto.PermissionVo;
 import com.example.rh.dto.RoleVo;
+import com.example.rh.dto.UserVo;
 import com.example.rh.enums.Permissions;
 import com.example.rh.enums.Roles;
 import com.example.rh.service.IUserService;
@@ -86,6 +87,30 @@ public class RhApplication {
                         ))
                         .build();
                 userService.save(roleStagiaire);
+            }
+            if (!userService.userExists("rhuser")) {
+                UserVo rhUser = UserVo.builder()
+                        .username("rhuser")
+                        .password("rhpassword")
+                        .email("rh@example.com")
+                        .firstName("RH")
+                        .lastName("User")
+                        .authorities(List.of(userService.getRoleByName(Roles.ROLE_RH.name())))
+                        .build();
+                userService.save(rhUser);
+            }
+
+            // Check if the Encadrant user already exists before creating it
+            if (!userService.userExists("encadrantuser")) {
+                UserVo encadrantUser = UserVo.builder()
+                        .username("encadrantuser")
+                        .password("encadrantpassword")
+                        .email("encadrant@example.com")
+                        .firstName("Encadrant")
+                        .lastName("User")
+                        .authorities(List.of(userService.getRoleByName(Roles.ROLE_ENCADRANT.name())))
+                        .build();
+                userService.save(encadrantUser);
             }
 
         };

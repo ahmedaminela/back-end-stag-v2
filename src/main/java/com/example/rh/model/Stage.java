@@ -19,7 +19,7 @@ public class Stage{
     private List<User> stagiaires = new ArrayList<>();
     @OneToMany(mappedBy = "stage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications = new ArrayList<>();
-    @OneToOne
+    @ManyToOne
     private User encadrant;
     private String title;
     private Date startDate;
