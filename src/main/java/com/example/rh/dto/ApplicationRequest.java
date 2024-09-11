@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApplicationRequest {
-    private Long stagiaireId;
+    private String username;
     private Long stageId;
-    private String notes;
 }

@@ -107,7 +107,9 @@ public class StageService {
     public Stage applyForStage(ApplicationRequest request) {
         Stage stage = stageRepository.findById(request.getStageId())
                 .orElseThrow(() -> new ResourceNotFoundException("Stage not found"));
-        User stagiaire = userRepository.findById(request.getStagiaireId())
+
+        // Find the user (stagiaire) by username
+        User stagiaire = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("Stagiaire not found"));
 
         Application application = new Application();
@@ -115,7 +117,6 @@ public class StageService {
         application.setStagiaire(stagiaire);
         application.setSubmissionDate(new Date());
         application.setStatus(ApplicationStatus.PENDING);
-        application.setNotes(request.getNotes());
 
         applicationRepository.save(application);
 
