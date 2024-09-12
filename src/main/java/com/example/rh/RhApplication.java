@@ -83,7 +83,9 @@ public class RhApplication {
                                 userService.getPermissionByName(Permissions.APPLY_FOR_STAGE.name()),
                                 userService.getPermissionByName(Permissions.GET_STAGE.name()),
                                 userService.getPermissionByName(Permissions.GET_ALL_STAGES.name()),
-                                userService.getPermissionByName(Permissions.GET_STAGES_BY_STATE.name())
+                                userService.getPermissionByName(Permissions.GET_STAGES_BY_STATE.name()),
+                                userService.getPermissionByName(Permissions.GET_MY_APPLICATIONS.name())
+
                         ))
                         .build();
                 userService.save(roleStagiaire);

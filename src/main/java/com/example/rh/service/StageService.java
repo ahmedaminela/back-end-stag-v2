@@ -138,26 +138,39 @@ public class StageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         Stage stage = application.getStage();
 
+        // Check if the current RH is the one who created the stage
         if (!stage.getRh().getUsername().equals(username)) {
             throw new UnauthorizedActionException("Unauthorized: Only the RH who created the stage can accept applications");
         }
+
         User stagiaire = application.getStagiaire();
 
+        // Ensure the application is pending
         if (!application.getStatus().equals(ApplicationStatus.PENDING)) {
             throw new InvalidOperationException("Application is not in a pending state");
         }
 
+        // Accept the application and assign the stage to the stagiaire
         application.setStatus(ApplicationStatus.ACCEPTED);
         stage.getStagiaires().add(stagiaire);
         stagiaire.setStage(stage);
 
+        // Set the RH and encadrant (retrieved from the Stage entity)
+        stagiaire.setRh(stage.getRh());              // Set the RH as a User object
+        stagiaire.setEncadrant(stage.getEncadrant()); // Retrieve the encadrant from the Stage
+
+        // Create a notification for the accepted stagiaire
         notificationService.createNotification(stagiaire.getId(),
                 "Congratulations! You have been accepted for the stage " + stage.getTitle(),
                 NotificationType.APPLICATION_ACCEPTED);
 
+        // Save the application and stage changes
         applicationRepository.save(application);
-        return stageRepository.save(stage);
+        stageRepository.save(stage);
+
+        return stage;
     }
+
 
     public Stage rejectApplication(Long applicationId, String username) {
         Application application = applicationRepository.findById(applicationId)

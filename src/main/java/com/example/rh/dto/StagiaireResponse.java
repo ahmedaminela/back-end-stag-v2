@@ -15,7 +15,8 @@ public class StagiaireResponse {
     private String lastname;
     private String email;
     private String phoneNumber;
-    private Long rhId;
-    private Long stageId;
-    private Long encadrantId;
+    private String rhName;         // Name of the RH
+    private String stageTitle;     // Title of the Stage
+    private String encadrantName;  // Name of the Encadrant
+
 }

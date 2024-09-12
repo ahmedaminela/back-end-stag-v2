@@ -163,10 +163,11 @@ public class StageController {
     public ResponseEntity<StageResponse> acceptApplication(
             @Parameter(description = "ID of the application to accept") @PathVariable Long applicationId) {
         String currentUsername = stageService.getCurrentUsername();
-        Stage updatedStage = stageService.acceptApplication(applicationId, currentUsername);
+        Stage updatedStage = stageService.acceptApplication(applicationId, currentUsername);  // No necadrantId needed
         StageResponse response = StageMapper.toStageResponse(updatedStage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     @Operation(summary = "Reject a stagiaire's application", description = "Allows the RH to reject a stagiaire's application for a stage.")
     @ApiResponses(value = {

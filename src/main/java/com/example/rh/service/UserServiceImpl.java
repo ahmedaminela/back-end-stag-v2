@@ -119,4 +119,7 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     public boolean userExistsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
+    public List<User> getAllStagiaires() {
+        return userRepository.findByRoleName("ROLE_STAGIAIRE"); // Call the method with the correct parameter
+    }
 }

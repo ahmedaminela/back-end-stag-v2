@@ -7,16 +7,16 @@ import com.example.rh.model.User;
 
 public class UserMapper {
 
-    public static StagiaireResponse toStagiaireResponse(User user) {
+    public static StagiaireResponse toStagiaireResponse(User stagiaire) {
         return StagiaireResponse.builder()
-                .id(user.getId())
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .rhId(user.getRh() != null ? user.getRh().getId() : null)
-                .stageId(user.getStage() != null ? user.getStage().getId() : null)
-                .encadrantId(user.getEncadrant() != null ? user.getEncadrant().getId() : null)
+                .id(stagiaire.getId())
+                .firstname(stagiaire.getFirstname())
+                .lastname(stagiaire.getLastname())
+                .email(stagiaire.getEmail())
+                .phoneNumber(stagiaire.getPhoneNumber())
+                .rhName(stagiaire.getRh() != null ? stagiaire.getRh().getFirstname() + " " + stagiaire.getRh().getLastname() : null)
+                .stageTitle(stagiaire.getStage() != null ? stagiaire.getStage().getTitle() : null)
+                .encadrantName(stagiaire.getEncadrant() != null ? stagiaire.getEncadrant().getFirstname() + " " + stagiaire.getEncadrant().getLastname() : null)
                 .build();
     }
     public static RhResponse toRhResponse(User user) {

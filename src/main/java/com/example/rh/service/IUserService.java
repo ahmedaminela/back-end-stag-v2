@@ -3,6 +3,7 @@ package com.example.rh.service;
 import com.example.rh.dto.PermissionVo;
 import com.example.rh.dto.RoleVo;
 import com.example.rh.dto.UserVo;
+import com.example.rh.model.User;
 
 import java.util.List;
 
@@ -17,4 +18,5 @@ public interface IUserService {
     boolean userExists(String username);
     boolean userExistsByEmail(String email);
 
+    List<User> getAllStagiaires();
 }
