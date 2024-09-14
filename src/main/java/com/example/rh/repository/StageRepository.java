@@ -14,4 +14,6 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
 
     List<Stage> findByTitleContainingOrDescriptionContaining(String keyword, String keyword1);
     Page<Stage> findByTitleContainingOrDescriptionContaining(String keyword, String keyword1, Pageable pageable);
+    List<Stage> findByEncadrantId(Long encadrantId);
+
 }

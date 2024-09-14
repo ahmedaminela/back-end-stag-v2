@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,6 +19,8 @@ public class StagiaireResponse {
     private String phoneNumber;
     private String rhName;         // Name of the RH
     private String stageTitle;     // Title of the Stage
-    private String encadrantName;  // Name of the Encadrant
+    private String encadrantName;
+    private Date startDate;        // Start date of the stage
+    private Date endDate; // Name of the Encadrant
 
 }

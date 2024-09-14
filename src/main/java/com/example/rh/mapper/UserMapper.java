@@ -17,8 +17,11 @@ public class UserMapper {
                 .rhName(stagiaire.getRh() != null ? stagiaire.getRh().getFirstname() + " " + stagiaire.getRh().getLastname() : null)
                 .stageTitle(stagiaire.getStage() != null ? stagiaire.getStage().getTitle() : null)
                 .encadrantName(stagiaire.getEncadrant() != null ? stagiaire.getEncadrant().getFirstname() + " " + stagiaire.getEncadrant().getLastname() : null)
+                .startDate(stagiaire.getStage() != null ? stagiaire.getStage().getStartDate() : null)  // Add startDate
+                .endDate(stagiaire.getStage() != null ? stagiaire.getStage().getEndDate() : null)      // Add endDate
                 .build();
     }
+
     public static RhResponse toRhResponse(User user) {
         return RhResponse.builder()
                 .id(user.getId())
