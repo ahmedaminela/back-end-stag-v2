@@ -2,12 +2,14 @@ package com.example.rh.service;
 
 import com.example.rh.dto.ApplicationRequest;
 import com.example.rh.dto.StageCreateRequest;
+import com.example.rh.dto.StagiaireResponse;
 import com.example.rh.enums.ApplicationStatus;
 import com.example.rh.enums.NotificationType;
 import com.example.rh.enums.StageState;
 import com.example.rh.exception.InvalidOperationException;
 import com.example.rh.exception.ResourceNotFoundException;
 import com.example.rh.exception.UnauthorizedActionException;
+import com.example.rh.mapper.UserMapper;
 import com.example.rh.model.Application;
 import com.example.rh.model.Stage;
 import com.example.rh.model.User;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StageService {
@@ -274,6 +277,13 @@ public class StageService {
     public String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
+    }
+    public List<StagiaireResponse> getStagiairesByEncadrant(Long encadrantId) {
+        List<Stage> stages = stageRepository.findByEncadrantId(encadrantId);
+        return stages.stream()
+                .flatMap(stage -> stage.getStagiaires().stream())
+                .map(UserMapper::toStagiaireResponse)
+                .collect(Collectors.toList());
     }
 
 }

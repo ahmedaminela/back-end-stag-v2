@@ -114,6 +114,17 @@ public class RhApplication {
                         .build();
                 userService.save(encadrantUser);
             }
+            if (!userService.userExists("oussamalagrini")) {
+                UserVo encadrantUser = UserVo.builder()
+                        .username("oussamalagrini")
+                        .password("oussama")
+                        .email("encadrant@example.com")
+                        .firstName("Encadrant")
+                        .lastName("User")
+                        .authorities(List.of(userService.getRoleByName(Roles.ROLE_ENCADRANT.name())))
+                        .build();
+                userService.save(encadrantUser);
+            }
 
         };
     }

@@ -8,6 +8,7 @@ import com.example.rh.mapper.UserMapper;
 import com.example.rh.model.Application;
 import com.example.rh.model.Stage;
 import com.example.rh.service.StageService;
+import com.example.rh.service.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -353,6 +356,12 @@ public class StageController {
         Page<Application> applications = stageService.getMyApplicationsPaginated(pageable);
         Page<ApplicationResponse> responses = applications.map(ApplicationMapper::toApplicationResponse);
         return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+    @GetMapping("/encadrant")
+    public List<StagiaireResponse> getStagiairesForEncadrant(Authentication authentication) {
+        // Assuming the encadrant's ID is stored in the authentication principal
+        Long encadrantId = ((UserDetailsImpl) authentication.getPrincipal()).getId();
+        return stageService.getStagiairesByEncadrant(encadrantId);
     }
 
 }

@@ -36,27 +36,17 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-
 
         List<GrantedAuthority> authorities = user.getAuthorities().stream()
                 .flatMap(role -> role.getAuthorities().stream()
                         .map(permission -> new SimpleGrantedAuthority(permission.getAuthority())))
                 .collect(Collectors.toList());
 
-
-        authorities.addAll(user.getAuthorities().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
-                .collect(Collectors.toList()));
-
-
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                authorities);
+        return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), authorities);
     }
+
 
     @Override
     public void save(UserVo userVo) {
