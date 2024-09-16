@@ -17,8 +17,9 @@ public class UserMapper {
                 .rhName(stagiaire.getRh() != null ? stagiaire.getRh().getFirstname() + " " + stagiaire.getRh().getLastname() : null)
                 .stageTitle(stagiaire.getStage() != null ? stagiaire.getStage().getTitle() : null)
                 .encadrantName(stagiaire.getEncadrant() != null ? stagiaire.getEncadrant().getFirstname() + " " + stagiaire.getEncadrant().getLastname() : null)
-                .startDate(stagiaire.getStage() != null ? stagiaire.getStage().getStartDate() : null)  // Add startDate
-                .endDate(stagiaire.getStage() != null ? stagiaire.getStage().getEndDate() : null)      // Add endDate
+                .startDate(stagiaire.getStage() != null ? stagiaire.getStage().getStartDate() : null)
+                .endDate(stagiaire.getStage() != null ? stagiaire.getStage().getEndDate() : null)
+                .applicationId(stagiaire.getApplications() != null && !stagiaire.getApplications().isEmpty() ? stagiaire.getApplications().get(0).getId() : null)  // Assuming you need the first application ID
                 .build();
     }
 

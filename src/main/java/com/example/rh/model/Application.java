@@ -35,7 +35,8 @@ public class Application {
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
-    private String notes;
+    private Double notes;
+    private String encadrantComments;  // Comments given by encadrant
 
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();

@@ -22,5 +22,6 @@ public class StagiaireResponse {
     private String encadrantName;
     private Date startDate;        // Start date of the stage
     private Date endDate; // Name of the Encadrant
+    private Long applicationId;    // Add this line for the application ID
 
 }

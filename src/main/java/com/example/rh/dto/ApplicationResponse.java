@@ -22,6 +22,8 @@ public class ApplicationResponse {
     private String stageName;
     private Date submissionDate;
     private ApplicationStatus status;
-    private String notes;
+    private Double notes;
+    private String encadrantComments;  // Encadrant's comments
+
     private List<FileResponse> files;
 }

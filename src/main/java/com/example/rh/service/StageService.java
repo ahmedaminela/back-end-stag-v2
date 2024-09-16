@@ -1,6 +1,7 @@
 package com.example.rh.service;
 
 import com.example.rh.dto.ApplicationRequest;
+import com.example.rh.dto.ApplicationResponse;
 import com.example.rh.dto.StageCreateRequest;
 import com.example.rh.dto.StagiaireResponse;
 import com.example.rh.enums.ApplicationStatus;
@@ -9,6 +10,7 @@ import com.example.rh.enums.StageState;
 import com.example.rh.exception.InvalidOperationException;
 import com.example.rh.exception.ResourceNotFoundException;
 import com.example.rh.exception.UnauthorizedActionException;
+import com.example.rh.mapper.ApplicationMapper;
 import com.example.rh.mapper.UserMapper;
 import com.example.rh.model.Application;
 import com.example.rh.model.Stage;
@@ -285,5 +287,20 @@ public class StageService {
                 .map(UserMapper::toStagiaireResponse)
                 .collect(Collectors.toList());
     }
+
+
+    public ApplicationResponse addEncadrantFeedback(Long applicationId, Double notes, String encadrantComments) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        // Set feedback
+        application.setNotes(notes);
+        application.setEncadrantComments(encadrantComments);
+        applicationRepository.save(application);
+
+        // Map and return updated application response
+        return ApplicationMapper.toApplicationResponse(application);
+
+}
 
 }

@@ -10,21 +10,23 @@ import java.util.stream.Collectors;
 
 public class ApplicationMapper {
 
-    public static ApplicationResponse toApplicationResponse(Application application) {
-        return ApplicationResponse.builder()
-                .id(application.getId())
-                .stagiaireId(application.getStagiaire().getId())
-                .stagiaireFirstname(application.getStagiaire().getFirstname())
-                .stagiaireLastname(application.getStagiaire().getLastname())
-                .stageId(application.getStage().getId())
-                .stageName(application.getStage().getTitle())  // Populate stage name
 
-                .submissionDate(application.getSubmissionDate())
-                .status(application.getStatus())
-                .notes(application.getNotes())
-                .files(mapFilesToFileResponses(application.getFiles()))
-                .build();
-    }
+        public static ApplicationResponse toApplicationResponse(Application application) {
+            return ApplicationResponse.builder()
+                    .id(application.getId())
+                    .stagiaireId(application.getStagiaire().getId())
+                    .stagiaireFirstname(application.getStagiaire().getFirstname())
+                    .stagiaireLastname(application.getStagiaire().getLastname())
+                    .stageId(application.getStage().getId())
+                    .stageName(application.getStage().getTitle())
+                    .submissionDate(application.getSubmissionDate())
+                    .status(application.getStatus())
+                    .notes(application.getNotes())  // Encadrant's note
+                    .encadrantComments(application.getEncadrantComments())  // Encadrant's comments
+                    .build();
+        }
+
+
 
     private static List<FileResponse> mapFilesToFileResponses(List<File> files) {
         return files.stream()
