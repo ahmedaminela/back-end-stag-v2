@@ -17,6 +17,8 @@ public class ApplicationMapper {
                 .stagiaireFirstname(application.getStagiaire().getFirstname())
                 .stagiaireLastname(application.getStagiaire().getLastname())
                 .stageId(application.getStage().getId())
+                .stageName(application.getStage().getTitle())  // Populate stage name
+
                 .submissionDate(application.getSubmissionDate())
                 .status(application.getStatus())
                 .notes(application.getNotes())

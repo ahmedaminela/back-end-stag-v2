@@ -102,7 +102,6 @@ public class StageController {
             @ApiResponse(responseCode = "200", description = "Stages retrieved successfully", content = @Content(schema = @Schema(implementation = StageResponse.class)))
     })
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('GET_ALL_STAGES')")
     public ResponseEntity<List<StageResponse>> getAllStages() {
         List<Stage> stages = stageService.getAllStages();
         List<StageResponse> responses = stages.stream()
@@ -338,7 +337,6 @@ public class StageController {
             @ApiResponse(responseCode = "200", description = "Applications retrieved successfully", content = @Content(schema = @Schema(implementation = ApplicationResponse.class)))
     })
     @GetMapping("/my/applications")
-    @PreAuthorize("hasAuthority('GET_MY_APPLICATIONS')")
     public ResponseEntity<List<ApplicationResponse>> getMyApplications() {
         List<ApplicationResponse> responses = stageService.getMyApplications().stream()
                 .map(ApplicationMapper::toApplicationResponse)

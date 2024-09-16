@@ -19,6 +19,7 @@ public class ApplicationResponse {
     private String stagiaireFirstname;
     private String stagiaireLastname;
     private Long stageId;
+    private String stageName;
     private Date submissionDate;
     private ApplicationStatus status;
     private String notes;
