@@ -14,5 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN u.authorities r WHERE r.authority = :roleName")
     List<User> findByRoleName(@Param("roleName") String roleName);
     // Add this method if not already present
+    List<User> findByAuthoritiesAuthority(String authority);
 
 }

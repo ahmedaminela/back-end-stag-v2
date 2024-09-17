@@ -1,5 +1,6 @@
 package com.example.rh.service;
 
+import com.example.rh.dto.EncadrantResponse;
 import com.example.rh.dto.PermissionVo;
 import com.example.rh.dto.RoleVo;
 import com.example.rh.dto.UserVo;
@@ -19,4 +20,6 @@ public interface IUserService {
     boolean userExistsByEmail(String email);
 
     List<User> getAllStagiaires();
+
+    List<EncadrantResponse> getEncadrants();
 }

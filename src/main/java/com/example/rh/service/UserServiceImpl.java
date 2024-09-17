@@ -1,8 +1,10 @@
 package com.example.rh.service;
 
+import com.example.rh.dto.EncadrantResponse;
 import com.example.rh.dto.PermissionVo;
 import com.example.rh.dto.RoleVo;
 import com.example.rh.dto.UserVo;
+import com.example.rh.mapper.UserMapper;
 import com.example.rh.model.Permission;
 import com.example.rh.model.Role;
 import com.example.rh.model.User;
@@ -112,4 +114,12 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     public List<User> getAllStagiaires() {
         return userRepository.findByRoleName("ROLE_STAGIAIRE"); // Call the method with the correct parameter
     }
+    @Override
+    public List<EncadrantResponse> getEncadrants() {
+        List<User> encadrants = userRepository.findByAuthoritiesAuthority("ROLE_ENCADRANT");
+        return encadrants.stream()
+                .map(UserMapper::toEncadrantResponse)
+                .collect(Collectors.toList());
+    }
+
 }

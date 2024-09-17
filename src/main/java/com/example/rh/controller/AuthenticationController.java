@@ -100,5 +100,10 @@ public class AuthenticationController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
+    @GetMapping
+    public List<EncadrantResponse> getEncadrants() {
+        return userService.getEncadrants();
+    }
+
 
 }
