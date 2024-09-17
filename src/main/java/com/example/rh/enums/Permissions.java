@@ -14,6 +14,7 @@ public enum Permissions {
     GET_ALL_STAGES,
     GET_STAGES_BY_STATE,
     UPDATE_STAGE_STATE,
-    GET_MY_APPLICATIONS
+    GET_MY_APPLICATIONS,
+    My_STAGIARES
 
 }

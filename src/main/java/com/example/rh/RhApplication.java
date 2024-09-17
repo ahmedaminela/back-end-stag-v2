@@ -70,7 +70,9 @@ public class RhApplication {
                                 userService.getPermissionByName(Permissions.UPDATE_STAGE_STATE.name()),
                                 userService.getPermissionByName(Permissions.UPDATE_STAGE.name()),
                                 userService.getPermissionByName(Permissions.GET_STAGE.name()),
-                                userService.getPermissionByName(Permissions.GET_ALL_STAGES.name())
+                                userService.getPermissionByName(Permissions.GET_ALL_STAGES.name()),
+                                userService.getPermissionByName(Permissions.My_STAGIARES.name())
+
                         ))
                         .build();
                 userService.save(roleEncadrant);
@@ -118,6 +120,16 @@ public class RhApplication {
                 UserVo encadrantUser = UserVo.builder()
                         .username("oussamalagrini")
                         .password("oussama")
+                        .email("encadrant@example.com")
+                        .firstName("Encadrant")
+                        .lastName("User")
+                        .authorities(List.of(userService.getRoleByName(Roles.ROLE_ENCADRANT.name())))
+                        .build();
+                userService.save(encadrantUser);
+            }  if (!userService.userExists("hamid")) {
+                UserVo encadrantUser = UserVo.builder()
+                        .username("hamid")
+                        .password("hamid")
                         .email("encadrant@example.com")
                         .firstName("Encadrant")
                         .lastName("User")
